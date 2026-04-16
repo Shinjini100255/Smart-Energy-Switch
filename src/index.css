@@ -1,0 +1,63 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono&display=swap');
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Outfit", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-bg-base: #FFFFFF;
+  --color-bg-card: #FDFCFB;
+  --color-ink: #2D2E2A;
+  --color-muted: #7C7D79;
+  --color-olive-dark: #4A5D4E; /* Sap Green */
+  --color-olive-light: #8E9182;
+  --color-terracotta: #D97706; /* Earthy Orange */
+  --color-leaf: #5A5A40; /* Deep Sap Green */
+  --color-sand: #D4A373; /* Light Brown */
+  --color-beige: #FAEDCD; /* Beige */
+}
+
+@layer base {
+  body {
+    @apply bg-bg-base text-ink antialiased selection:bg-sand/30 min-h-screen;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(212, 163, 115, 0.08) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(74, 93, 78, 0.08) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(217, 119, 6, 0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(250, 237, 205, 0.1) 0px, transparent 50%);
+  }
+
+  .dark body {
+    @apply bg-[#1A1C18] text-[#E4E3DA];
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(212, 163, 115, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(74, 93, 78, 0.15) 0px, transparent 50%);
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.glass-card {
+  @apply bg-white dark:bg-[#242622] border border-sand/20 dark:border-white/5 shadow-sm;
+}
+
+.glass-sidebar {
+  @apply bg-[#FDFCFB] dark:bg-[#1A1C18] border-r border-sand/10 dark:border-white/5;
+}
+
+.glass-header {
+  @apply bg-white/90 dark:bg-[#1A1C18]/90 border-b border-sand/10 dark:border-white/5;
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
