@@ -108,3 +108,10 @@ export interface CommunityPost {
   alternative: string;
   timestamp: string;
 }
+
+export interface RecipeFeedback {
+  recipeTitle: string;
+  rating: 'up' | 'down';
+  comment?: string;
+  timestamp: number;
+}

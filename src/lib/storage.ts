@@ -1,4 +1,4 @@
-import { UserProfile, ChatMessage } from '../types';
+import { UserProfile, ChatMessage, RecipeFeedback } from '../types';
 import { supabase } from './supabase';
 
 const PROFILE_KEY = 'ses_user_profile';
@@ -183,4 +183,26 @@ export const fetchChatHistoryFromSupabase = async (existingUser?: any): Promise<
 
 export const clearChatHistory = () => {
   localStorage.removeItem(CHAT_KEY);
+};
+
+export const saveRecipeFeedback = async (feedback: RecipeFeedback) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { error } = await supabase
+      .from('recipe_feedback')
+      .insert({
+        user_id: user.id,
+        recipe_title: feedback.recipeTitle,
+        rating: feedback.rating,
+        comment: feedback.comment,
+        timestamp: new Date(feedback.timestamp).toISOString()
+      });
+    if (error) console.error('Error saving recipe feedback:', error);
+  } else {
+    // Fallback to local storage if no user
+    const existing = localStorage.getItem('ses_recipe_feedback');
+    const feedbacks = existing ? JSON.parse(existing) : [];
+    feedbacks.push(feedback);
+    localStorage.setItem('ses_recipe_feedback', JSON.stringify(feedbacks));
+  }
 };

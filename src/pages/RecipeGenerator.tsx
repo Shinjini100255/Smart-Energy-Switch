@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Select } from '../components/ui';
 import { getGasFreeRecipes } from '../lib/gemini';
-import { Recipe } from '../types';
-import { motion } from 'motion/react';
-import { ChefHat, Loader2, Clock, Utensils } from 'lucide-react';
+import { Recipe, RecipeFeedback } from '../types';
+import { motion, AnimatePresence } from 'motion/react';
+import { ChefHat, Loader2, Clock, Utensils, ThumbsUp, ThumbsDown, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { saveRecipeFeedback } from '../lib/storage';
 
 export const RecipeGenerator = () => {
   const [ingredients, setIngredients] = useState('Rice, Dal, Potatoes, Onions');
@@ -12,17 +13,33 @@ export const RecipeGenerator = () => {
   
   const [loading, setLoading] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<Record<string, boolean>>({});
+  const [feedbackComments, setFeedbackComments] = useState<Record<string, string>>({});
 
   const handleGenerate = async () => {
     setLoading(true);
     try {
       const result = await getGasFreeRecipes(ingredients, appliances, dietType);
       setRecipes(result);
+      setFeedbackSubmitted({});
+      setFeedbackComments({});
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFeedback = async (recipeTitle: string, rating: 'up' | 'down') => {
+    const feedback: RecipeFeedback = {
+      recipeTitle,
+      rating,
+      comment: feedbackComments[recipeTitle] || '',
+      timestamp: Date.now()
+    };
+
+    await saveRecipeFeedback(feedback);
+    setFeedbackSubmitted(prev => ({ ...prev, [recipeTitle]: true }));
   };
 
   return (
@@ -110,23 +127,70 @@ export const RecipeGenerator = () => {
                     </div>
                   </div>
                 </div>
-                <CardContent className="p-10 flex-1 bg-bg-card dark:bg-[#242622]">
-                  <div className="flex items-center gap-3 mb-8">
-                    <div className="w-10 h-10 bg-white dark:bg-[#1A1C18] rounded-xl flex items-center justify-center border border-sand/10 shadow-sm">
-                      <ChefHat className="h-5 w-5 text-olive-dark dark:text-sand" />
+                <CardContent className="p-10 flex-1 bg-bg-card dark:bg-[#242622] flex flex-col">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-8">
+                      <div className="w-10 h-10 bg-white dark:bg-[#1A1C18] rounded-xl flex items-center justify-center border border-sand/10 shadow-sm">
+                        <ChefHat className="h-5 w-5 text-olive-dark dark:text-sand" />
+                      </div>
+                      <h4 className="font-bold text-xs uppercase tracking-[3px] text-muted dark:text-muted">Instructions</h4>
                     </div>
-                    <h4 className="font-bold text-xs uppercase tracking-[3px] text-muted dark:text-muted">Instructions</h4>
+                    <ol className="space-y-8 mb-10">
+                      {recipe.steps.map((step, i) => (
+                        <li key={i} className="text-base text-ink/80 dark:text-[#E4E3DA]/80 flex gap-5 font-medium leading-relaxed">
+                          <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-olive-dark text-white text-[10px] font-bold shadow-sm">
+                            {i + 1}
+                          </span>
+                          {step}
+                        </li>
+                      ))}
+                    </ol>
                   </div>
-                  <ol className="space-y-8">
-                    {recipe.steps.map((step, i) => (
-                      <li key={i} className="text-base text-ink/80 dark:text-[#E4E3DA]/80 flex gap-5 font-medium leading-relaxed">
-                        <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-olive-dark text-white text-[10px] font-bold shadow-sm">
-                          {i + 1}
-                        </span>
-                        {step}
-                      </li>
-                    ))}
-                  </ol>
+
+                  {/* Feedback Mechanism */}
+                  <div className="mt-auto pt-8 border-t border-sand/10">
+                    <AnimatePresence mode="wait">
+                      {feedbackSubmitted[recipe.title] ? (
+                        <motion.div 
+                          key="submitted"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="flex items-center justify-center gap-3 py-4 bg-olive-dark/5 rounded-2xl text-olive-dark dark:text-sand font-bold text-sm uppercase tracking-widest"
+                        >
+                          <CheckCircle2 className="h-5 w-5" /> Feedback Received
+                        </motion.div>
+                      ) : (
+                        <motion.div key="form" className="space-y-6">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-muted dark:text-muted uppercase tracking-[2px]">Rate this recipe</span>
+                            <div className="flex gap-4">
+                              <button 
+                                onClick={() => handleFeedback(recipe.title, 'up')}
+                                className="p-3 bg-white dark:bg-[#1A1C18] rounded-xl border border-sand/10 hover:border-olive-dark hover:text-olive-dark transition-all shadow-sm"
+                              >
+                                <ThumbsUp className="h-4 w-4" />
+                              </button>
+                              <button 
+                                onClick={() => handleFeedback(recipe.title, 'down')}
+                                className="p-3 bg-white dark:bg-[#1A1C18] rounded-xl border border-sand/10 hover:border-terracotta hover:text-terracotta transition-all shadow-sm"
+                              >
+                                <ThumbsDown className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="relative">
+                            <Input 
+                              placeholder="Any comments?"
+                              value={feedbackComments[recipe.title] || ''}
+                              onChange={(e) => setFeedbackComments(prev => ({ ...prev, [recipe.title]: e.target.value as string }))}
+                              className="h-12 text-sm rounded-xl bg-white dark:bg-[#1A1C18] border border-sand/10 pl-10 pr-4 text-ink dark:text-[#E4E3DA] focus:border-sand"
+                            />
+                            <MessageSquare className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
