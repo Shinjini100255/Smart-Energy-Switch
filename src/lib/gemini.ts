@@ -9,7 +9,8 @@ export const chatWithEnergyAdvisor = async (
   message: string,
   history: ChatMessage[],
   profile: UserProfile,
-  reports: any[] = []
+  reports: any[] = [],
+  news: any[] = []
 ) => {
   const settings = getSettings();
   const language = settings.language;
@@ -17,6 +18,10 @@ export const chatWithEnergyAdvisor = async (
   const reportsSummary = reports.length > 0 
     ? reports.map(r => `- ${r.title}: ${r.decision_summary}`).join('\n')
     : 'No previous reports saved.';
+
+  const newsSummary = news.length > 0
+    ? news.map(n => `- ${n.title}: ${n.description}`).join('\n')
+    : 'No real-time news available.';
 
   const systemInstruction = `
 You are an expert AI Energy Consultant for "SMART ENERGY SWITCH".
@@ -37,15 +42,19 @@ User Profile:
 Previous Reports & Decisions:
 ${reportsSummary}
 
+Real-Time Energy News & Alerts:
+${newsSummary}
+
 ====================================================
-🧠 MEMORY USAGE RULE
+🧠 MEMORY & NEWS USAGE RULE
 ====================================================
-Use the saved data intelligently:
+Use the saved data and real-time news intelligently:
 - If family size exists → do not ask again.
 - If electricity is "Poor" or "Average" → avoid induction; suggest Biogas, Solar, or Hybrid.
-- If location exists → prioritize local vendors or rural-appropriate solutions (like Biogas for rural).
-- If previous recommendation exists → acknowledge it and compare if relevant.
-- Personalize every response using stored memory.
+- If location exists → prioritize local vendors or rural-appropriate solutions.
+- If news mentions LPG price hikes or shortages → acknowledge this and emphasize urgency.
+- If news mentions new subsidies (Solar/Biogas) → include this in your recommendation to lower costs.
+- Personalize every response using stored memory and real-time context.
 
 ====================================================
 🎯 AI BEHAVIOR RULES
