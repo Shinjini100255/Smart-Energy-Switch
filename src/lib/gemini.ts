@@ -3,7 +3,15 @@ import { UserProfile, ChatMessage } from '../types';
 import { getSettings } from './settings';
 
 // Initialize the Gemini API client
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// IMPORTANT: On Netlify, set VITE_GEMINI_API_KEY in Environment Variables.
+// Note: For production apps, use a server-side proxy to keep your API key secure.
+const geminiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+
+if (!geminiKey) {
+  console.warn('Gemini API key missing. AI features will not work until VITE_GEMINI_API_KEY is set.');
+}
+
+const ai = new GoogleGenAI({ apiKey: geminiKey || 'placeholder-key' });
 
 export const chatWithEnergyAdvisor = async (
   message: string,
