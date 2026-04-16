@@ -157,8 +157,10 @@ export const getGasFreeRecipes = async (
     1. Do NOT always suggest induction. 
     2. You MUST adapt to the exact appliances provided by the user.
     3. You MUST respond entirely in ${language}.
-    4. BE EXTREMELY CONCISE. Short titles, short steps.
-    5. Speed is priority.
+    4. Provide COMPLETE, INFORMATIVE instructions. 
+    5. Each step MUST include specific timings (e.g., "for 3 minutes") and exact ingredient amounts (e.g., "add 2 cups of water").
+    6. Ensure the user knows exactly when the dish is ready.
+    7. Speed is priority, but detail is mandatory.
     
     Generate 3 quick recipes (10-15 mins) using ONLY the available appliances and ingredients.
     

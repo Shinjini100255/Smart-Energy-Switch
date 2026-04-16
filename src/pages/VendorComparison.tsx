@@ -182,48 +182,55 @@ export const VendorComparison = () => {
               className="h-full"
             >
               <Card className={`h-full flex flex-col overflow-hidden group transition-all duration-300 border-none shadow-xl bg-bg-card dark:bg-[#242622] ${vendor.tags.length > 0 ? 'ring-2 ring-olive-dark/20' : ''}`}>
-                <div className="relative h-56 bg-white dark:bg-[#1A1C18] flex items-center justify-center overflow-hidden border-b border-sand/10">
-                  <div className="absolute inset-0 bg-gradient-to-br from-olive-dark/5 to-transparent" />
-                  <Tag className="h-24 w-24 text-olive-dark/5 transform -rotate-12 group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute top-6 left-6 flex flex-wrap gap-2">
-                    {vendor.tags.map(tag => (
-                      <span key={tag} className="px-4 py-1.5 bg-olive-dark/10 text-olive-dark dark:text-sand text-[10px] font-bold rounded-full shadow-sm flex items-center gap-2 uppercase tracking-widest border border-sand/10">
-                        <Star className="h-3 w-3 fill-current" /> {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="absolute bottom-6 right-6">
-                    <div className="bg-white/80 dark:bg-black/40 px-4 py-1.5 rounded-full text-[10px] font-bold text-muted dark:text-muted shadow-sm border border-sand/10 uppercase tracking-widest">
-                      {vendor.availability}
-                    </div>
-                  </div>
-                </div>
-                
                 <CardContent className="p-8 flex-1 flex flex-col">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="space-y-1">
+                  <div className="flex justify-between items-start mb-6 border-b border-sand/10 pb-6">
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {vendor.tags.map(tag => (
+                          <span key={tag} className="px-3 py-1 bg-olive-dark/10 text-olive-dark dark:text-sand text-[8px] font-bold rounded-full uppercase tracking-widest border border-sand/5">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                       <h3 className="text-2xl font-bold text-ink dark:text-[#E4E3DA] group-hover:text-olive-dark dark:group-hover:text-sand transition-colors leading-tight">{vendor.name}</h3>
-                      <span className="text-[10px] font-bold text-muted dark:text-muted uppercase tracking-[2px]">{vendor.appliance}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-muted dark:text-muted uppercase tracking-[2px]">{vendor.appliance}</span>
+                        <div className="w-1 h-1 rounded-full bg-sand/30" />
+                        <span className="text-[10px] font-bold text-olive-dark/70 dark:text-sand/70 uppercase tracking-[2px]">{vendor.availability}</span>
+                      </div>
                     </div>
                     <div className="text-right">
                       <div className="text-3xl font-serif font-bold text-ink dark:text-[#E4E3DA]">₹{vendor.price}</div>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-6 mt-8 mb-10">
+                  <div className="grid grid-cols-2 gap-6 mb-10">
                     <div className="flex items-center gap-3 text-sm font-bold text-muted dark:text-muted">
                       <div className="p-3 bg-white dark:bg-[#1A1C18] rounded-xl border border-sand/10 shadow-sm">
                         {vendor.isOnline ? <ExternalLink className="h-4 w-4 text-olive-dark dark:text-sand" /> : <MapPin className="h-4 w-4 text-olive-dark dark:text-sand" />}
                       </div>
-                      {vendor.isOnline ? 'Online' : `${vendor.distance}km`}
+                      <div className="flex flex-col">
+                        <span className="text-[8px] uppercase tracking-wider opacity-60">Location</span>
+                        {vendor.isOnline ? 'Online Store' : `${vendor.distance}km away`}
+                      </div>
                     </div>
                     <div className="flex items-center gap-3 text-sm font-bold text-muted dark:text-muted">
                       <div className="p-3 bg-white dark:bg-[#1A1C18] rounded-xl border border-sand/10 shadow-sm">
                         <Star className="h-4 w-4 text-terracotta fill-current" />
                       </div>
-                      {vendor.rating} ({vendor.reviews})
+                      <div className="flex flex-col">
+                        <span className="text-[8px] uppercase tracking-wider opacity-60">Avg Rating</span>
+                        {vendor.rating} ({vendor.reviews} reviews)
+                      </div>
                     </div>
                   </div>
+
+                  {vendor.isOnline && vendor.url && (
+                    <div className="mb-6 px-4 py-2 bg-sand/5 dark:bg-white/5 rounded-xl border border-sand/10 overflow-hidden">
+                      <div className="text-[8px] font-bold text-muted uppercase tracking-widest mb-1">Store Link</div>
+                      <div className="text-[10px] text-olive-dark dark:text-sand truncate font-medium underline decoration-sand/20">{vendor.url}</div>
+                    </div>
+                  )}
 
                   <Button 
                     className={`w-full h-14 rounded-2xl font-bold transition-all text-base ${

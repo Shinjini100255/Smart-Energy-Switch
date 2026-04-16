@@ -192,9 +192,13 @@ export const ProfileSetup = () => {
                     />
                     <Input
                       label="Budget (₹)"
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       value={profile.budget}
-                      onChange={(e) => setProfile({ ...profile, budget: parseInt(e.target.value as string) || 0 })}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^0-9]/g, '');
+                        setProfile({ ...profile, budget: parseInt(val) || 0 });
+                      }}
                       required
                       className="h-16 rounded-2xl bg-white dark:bg-[#1A1C18] border-2 border-sand/10 px-8 text-ink dark:text-[#E4E3DA] focus:border-sand"
                     />
