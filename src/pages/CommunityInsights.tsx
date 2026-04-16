@@ -3,9 +3,49 @@ import { Card, CardContent, CardHeader, CardTitle, Button, Input, Select } from 
 import { getProfile } from '../lib/storage';
 import { UserProfile, CommunityPost } from '../types';
 import { motion } from 'motion/react';
-import { MapPin, Users, Send, ArrowUpRight } from 'lucide-react';
+import { MapPin, Users, Send, ArrowUpRight, Leaf, AlertCircle, Info } from 'lucide-react';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+
+interface FuelCluster {
+  id: string;
+  name: string;
+  location: [number, number];
+  dominantFuel: string;
+  userCount: number;
+  emissionScore: number; // 0-100
+  sustainabilityRank: number; // 1-10
+}
+
+const FUEL_TYPES = {
+  SOLAR: { label: 'Solar Cooker', color: '#3B82F6', intensity: 'Very Low', score: 5 },
+  BIOGAS: { label: 'Biogas', color: '#10B981', intensity: 'Low', score: 15 },
+  ELECTRICITY: { label: 'Electricity', color: '#F59E0B', intensity: 'Medium', score: 40 },
+  PNG: { label: 'PNG / Natural Gas', color: '#F97316', intensity: 'Medium', score: 45 },
+  LPG: { label: 'LPG', color: '#EA580C', intensity: 'Medium-High', score: 60 },
+  KEROSENE: { label: 'Kerosene', color: '#EF4444', intensity: 'High', score: 80 },
+  BIOMASS: { label: 'Biomass / Wood', color: '#DC2626', intensity: 'High', score: 85 },
+  CHARCOAL: { label: 'Charcoal', color: '#7C3AED', intensity: 'Very High', score: 95 },
+  HYBRID: { label: 'Hybrid Fuel', color: '#6366F1', intensity: 'Variable', score: 50 },
+};
+
+const COMMUNITY_CLUSTERS: FuelCluster[] = [
+  { id: 'c1', name: 'Bandra West', location: [19.0596, 72.8295], dominantFuel: 'PNG', userCount: 1250, emissionScore: 45, sustainabilityRank: 4 },
+  { id: 'c2', name: 'Dharavi Sector 1', location: [19.0380, 72.8538], dominantFuel: 'Biomass', userCount: 3400, emissionScore: 85, sustainabilityRank: 8 },
+  { id: 'c3', name: 'Andheri East', location: [19.1136, 72.8697], dominantFuel: 'LPG', userCount: 2100, emissionScore: 60, sustainabilityRank: 6 },
+  { id: 'c4', name: 'Powai Eco-Hub', location: [19.1176, 72.9060], dominantFuel: 'Solar', userCount: 450, emissionScore: 5, sustainabilityRank: 1 },
+  { id: 'c5', name: 'Thane Industrial', location: [19.2183, 72.9781], dominantFuel: 'Charcoal', userCount: 890, emissionScore: 95, sustainabilityRank: 10 },
+  { id: 'c6', name: 'Navi Mumbai', location: [19.0330, 73.0297], dominantFuel: 'Electricity', userCount: 1800, emissionScore: 40, sustainabilityRank: 3 },
+  { id: 'c7', name: 'Chembur', location: [19.0622, 72.8974], dominantFuel: 'Biogas', userCount: 620, emissionScore: 15, sustainabilityRank: 2 },
+  { id: 'c8', name: 'Kurla', location: [19.0727, 72.8826], dominantFuel: 'Kerosene', userCount: 1100, emissionScore: 80, sustainabilityRank: 9 },
+];
+
+const getHeatColor = (score: number) => {
+  if (score < 20) return '#10B981'; // Green (Low)
+  if (score < 50) return '#F59E0B'; // Yellow/Orange (Medium)
+  if (score < 85) return '#EF4444'; // Red (High)
+  return '#7C3AED'; // Purple (Extreme)
+};
 
 const INITIAL_COMMUNITY_POSTS: CommunityPost[] = [
   { id: '1', user: 'Rahul D.', location: 'Andheri West', status: 'LPG delayed by 3 days', alternative: 'Induction', timestamp: '5 mins ago' },
@@ -74,32 +114,113 @@ export const CommunityInsights = () => {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                     url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                   />
-                  {/* Shortage Heatmap points */}
-                  <CircleMarker center={[19.0500, 72.9000]} radius={20} pathOptions={{ color: 'transparent', fillColor: '#D97706', fillOpacity: 0.4 }}>
-                    <Popup>High LPG Shortage Reported</Popup>
-                  </CircleMarker>
-                  <CircleMarker center={[19.1000, 72.8500]} radius={30} pathOptions={{ color: 'transparent', fillColor: '#D97706', fillOpacity: 0.3 }}>
-                    <Popup>Medium LPG Shortage Reported</Popup>
-                  </CircleMarker>
-                  
-                  {/* Alternative Usage points */}
-                  <CircleMarker center={[19.0800, 72.8800]} radius={15} pathOptions={{ color: 'transparent', fillColor: '#4A5D4E', fillOpacity: 0.6 }}>
-                    <Popup>High Induction Usage</Popup>
-                  </CircleMarker>
-                  <CircleMarker center={[19.0200, 72.8400]} radius={25} pathOptions={{ color: 'transparent', fillColor: '#4A5D4E', fillOpacity: 0.5 }}>
-                    <Popup>High Solar/Biogas Usage</Popup>
-                  </CircleMarker>
+                  {COMMUNITY_CLUSTERS.map((cluster) => {
+                    const fuelInfo = Object.values(FUEL_TYPES).find(f => f.label.includes(cluster.dominantFuel)) || FUEL_TYPES.LPG;
+                    return (
+                      <CircleMarker 
+                        key={cluster.id}
+                        center={cluster.location} 
+                        radius={15 + (cluster.userCount / 500)} 
+                        pathOptions={{ 
+                          color: 'white', 
+                          weight: 2,
+                          fillColor: getHeatColor(cluster.emissionScore), 
+                          fillOpacity: 0.7 
+                        }}
+                      >
+                        <Popup className="custom-popup">
+                          <div className="p-3 space-y-3 min-w-[200px]">
+                            <div className="flex justify-between items-start border-b border-sand/10 pb-2">
+                              <h4 className="font-bold text-ink text-lg">{cluster.name}</h4>
+                              <span className="text-[10px] font-bold bg-sand/10 px-2 py-1 rounded-full uppercase tracking-wider">
+                                Rank #{cluster.sustainabilityRank}
+                              </span>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs text-muted font-medium">Dominant Fuel:</span>
+                                <span className="text-xs font-bold text-ink flex items-center gap-2">
+                                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: fuelInfo.color }} />
+                                  {cluster.dominantFuel}
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs text-muted font-medium">CO₂ Intensity:</span>
+                                <span className="text-xs font-bold" style={{ color: getHeatColor(cluster.emissionScore) }}>
+                                  {fuelInfo.intensity} ({cluster.emissionScore}/100)
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs text-muted font-medium">Active Users:</span>
+                                <span className="text-xs font-bold text-ink">{cluster.userCount.toLocaleString()}</span>
+                              </div>
+                            </div>
+                            <div className="pt-2">
+                              <div className="w-full bg-sand/10 h-1.5 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full transition-all duration-1000" 
+                                  style={{ 
+                                    width: `${cluster.emissionScore}%`,
+                                    backgroundColor: getHeatColor(cluster.emissionScore)
+                                  }} 
+                                />
+                              </div>
+                              <div className="flex justify-between mt-1">
+                                <span className="text-[8px] font-bold text-muted uppercase tracking-tighter">Low Emission</span>
+                                <span className="text-[8px] font-bold text-muted uppercase tracking-tighter">High Emission</span>
+                              </div>
+                            </div>
+                          </div>
+                        </Popup>
+                      </CircleMarker>
+                    );
+                  })}
                 </MapContainer>
               </div>
-              <div className="p-8 flex flex-wrap gap-10 text-[10px] font-bold text-muted dark:text-muted justify-center bg-beige/10 dark:bg-black/20 border-t border-sand/10 uppercase tracking-[2px]">
-                <span className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full bg-terracotta opacity-60"></div> 
-                  LPG Shortage Reports
-                </span>
-                <span className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full bg-olive-dark opacity-60"></div> 
-                  Alternative Adoption
-                </span>
+
+              <div className="p-8 bg-white dark:bg-[#1A1C18] border-t border-sand/10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <h5 className="text-[10px] font-bold text-muted dark:text-muted uppercase tracking-[3px] flex items-center gap-2">
+                      <Leaf className="h-4 w-4 text-olive-dark" /> CO₂ Emission Intensity
+                    </h5>
+                    <div className="flex items-center gap-2 w-full max-w-md">
+                      <div className="flex-1 h-3 rounded-l-full bg-[#10B981]" />
+                      <div className="flex-1 h-3 bg-[#F59E0B]" />
+                      <div className="flex-1 h-3 bg-[#EF4444]" />
+                      <div className="flex-1 h-3 rounded-r-full bg-[#7C3AED]" />
+                    </div>
+                    <div className="flex justify-between text-[9px] font-bold text-muted uppercase tracking-wider max-w-md">
+                      <span>Low CO₂</span>
+                      <span>Medium</span>
+                      <span>High</span>
+                      <span>Extreme</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h5 className="text-[10px] font-bold text-muted dark:text-muted uppercase tracking-[3px] flex items-center gap-2">
+                      <Users className="h-4 w-4 text-terracotta" /> Fuel Clusters
+                    </h5>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {Object.entries(FUEL_TYPES).slice(0, 6).map(([key, fuel]) => (
+                        <div key={key} className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: fuel.color }} />
+                          <span className="text-[10px] font-bold text-ink dark:text-[#E4E3DA] whitespace-nowrap">{fuel.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-8 p-4 bg-bg-card dark:bg-[#242622] rounded-2xl border border-sand/10 flex items-start gap-4">
+                  <Info className="h-5 w-5 text-sand shrink-0 mt-0.5" />
+                  <p className="text-xs text-muted dark:text-muted leading-relaxed">
+                    This heatmap visualizes estimated carbon emissions based on dominant cooking fuel usage in each community. 
+                    <strong> Cooler zones (Green/Blue)</strong> indicate higher adoption of sustainable alternatives like Solar or Biogas, 
+                    while <strong>Hotter zones (Red/Purple)</strong> indicate reliance on high-emission fuels like Biomass or Charcoal.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
