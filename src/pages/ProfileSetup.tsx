@@ -25,6 +25,7 @@ export const ProfileSetup = () => {
     cookingFrequency: 'Medium',
     foodPreference: 'Both',
     electricityAvailability: 'Average',
+    budget: 0,
   });
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export const ProfileSetup = () => {
         setProfile(prev => ({
           ...prev,
           ...existing,
+          budget: existing?.budget ?? prev.budget,
           familySize: existing?.familySize || prev.familySize,
           email: user?.email || existing?.email || prev.email || '',
         }));

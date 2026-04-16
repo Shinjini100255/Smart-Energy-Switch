@@ -55,7 +55,18 @@ export const saveProfile = async (profile: UserProfile) => {
 
 export const getProfile = (): UserProfile | null => {
   const data = localStorage.getItem(PROFILE_KEY);
-  return data ? JSON.parse(data) : null;
+  if (!data) return null;
+  const profile = JSON.parse(data);
+  return {
+    name: profile.name || '',
+    email: profile.email || '',
+    location: profile.location || '',
+    familySize: profile.familySize || { adults: 2, children: 1 },
+    cookingFrequency: profile.cookingFrequency || 'Medium',
+    foodPreference: profile.foodPreference || 'Both',
+    electricityAvailability: profile.electricityAvailability || 'Average',
+    budget: profile.budget || 0,
+  };
 };
 
 export const fetchProfileFromSupabase = async (): Promise<UserProfile | null> => {
