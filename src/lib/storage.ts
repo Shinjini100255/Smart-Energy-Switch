@@ -69,8 +69,8 @@ export const getProfile = (): UserProfile | null => {
   };
 };
 
-export const fetchProfileFromSupabase = async (): Promise<UserProfile | null> => {
-  const { data: { user } } = await supabase.auth.getUser();
+export const fetchProfileFromSupabase = async (existingUser?: any): Promise<UserProfile | null> => {
+  const user = existingUser || (await supabase.auth.getUser()).data.user;
   if (!user) return null;
 
   const { data, error } = await supabase
@@ -115,8 +115,8 @@ export const saveReport = async (title: string, content: string, decisionSummary
   if (error) console.error('Error saving report:', error);
 };
 
-export const fetchReports = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
+export const fetchReports = async (existingUser?: any) => {
+  const user = existingUser || (await supabase.auth.getUser()).data.user;
   if (!user) return [];
 
   const { data, error } = await supabase
@@ -164,8 +164,8 @@ export const getChatHistory = (): ChatMessage[] => {
   return data ? JSON.parse(data) : [];
 };
 
-export const fetchChatHistoryFromSupabase = async (): Promise<ChatMessage[]> => {
-  const { data: { user } } = await supabase.auth.getUser();
+export const fetchChatHistoryFromSupabase = async (existingUser?: any): Promise<ChatMessage[]> => {
+  const user = existingUser || (await supabase.auth.getUser()).data.user;
   if (!user) return [];
 
   const { data, error } = await supabase
