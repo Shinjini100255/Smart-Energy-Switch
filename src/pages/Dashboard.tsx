@@ -115,6 +115,14 @@ export const Dashboard = () => {
 
   if (!profile) return null;
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return t('good_morning');
+    if (hour >= 12 && hour < 17) return t('good_afternoon');
+    if (hour >= 17 && hour < 21) return t('good_evening');
+    return t('good_night');
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -125,7 +133,7 @@ export const Dashboard = () => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="font-serif text-4xl font-bold text-ink dark:text-white tracking-tight">
-            {t('welcome')}, {profile.name || profile.email.split('@')[0]}
+            {getGreeting()}, {profile.name || profile.email.split('@')[0]}
           </h1>
           <p className="text-muted dark:text-muted mt-2 text-lg flex items-center gap-2">
             <MapPin className="h-5 w-5 text-terracotta" /> {profile.location}
@@ -203,9 +211,9 @@ export const Dashboard = () => {
             <h3 className="text-3xl font-serif font-bold leading-tight">
               {t('emergency')}
             </h3>
-            <p className="text-white/80 mt-4 text-base leading-relaxed">LPG shortage in your area? Get immediate alternatives.</p>
+            <p className="text-white/80 mt-4 text-base leading-relaxed">Fuel shortage in your area? Get immediate alternatives.</p>
           </div>
-          <Link to="/recommendations">
+          <Link to="/emergency">
             <Button variant="secondary" className="w-full mt-10 bg-yellow-400 text-ink hover:bg-yellow-300 border-none h-14 rounded-2xl font-bold shadow-xl">
               {t('need_now')} <ArrowRight className="ml-2 h-5 w-5" />
             </Button>

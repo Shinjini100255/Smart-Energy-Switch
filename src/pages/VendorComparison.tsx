@@ -119,19 +119,24 @@ export const VendorComparison = () => {
 
       {/* Smart Buy Suggestion */}
       {!searchQuery && bestVendor && (
-        <Card className="bg-gradient-to-r from-olive-dark to-[#5A5A40] text-white border-none shadow-2xl rounded-[32px] overflow-hidden">
+        <Card className="bg-white dark:bg-[#1A1C18] text-ink dark:text-[#E4E3DA] border-2 border-sand/10 hover:bg-gradient-to-r hover:from-olive-dark hover:to-[#5A5A40] hover:text-white transition-all duration-500 shadow-2xl rounded-[32px] overflow-hidden group cursor-pointer">
           <CardContent className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-sand font-bold text-sm uppercase tracking-[3px]">
+              <div className="flex items-center gap-3 text-olive-dark dark:text-sand group-hover:text-sand font-bold text-sm uppercase tracking-[3px] transition-colors">
                 <Star className="h-5 w-5 fill-current" /> Smart Buy Suggestion
               </div>
               <h3 className="text-3xl font-bold leading-tight">Best product under your budget</h3>
-              <p className="text-beige/80 text-lg">Recommended model: <span className="font-bold text-white">{bestVendor.name} - {bestVendor.appliance}</span></p>
+              <p className="text-muted dark:text-muted group-hover:text-beige/80 text-lg transition-colors">
+                Recommended model: <span className="font-bold text-ink dark:text-[#E4E3DA] group-hover:text-white">{bestVendor.name} - {bestVendor.appliance}</span>
+              </p>
             </div>
             <div className="text-center md:text-right space-y-4">
               <div className="text-5xl font-serif font-bold">₹{bestVendor.price}</div>
-              <Button className="h-14 px-10 rounded-2xl bg-white text-olive-dark hover:bg-beige font-bold text-lg" onClick={() => handleVendorAction(bestVendor)}>
-                View Deal
+              <Button 
+                className="h-14 px-10 rounded-2xl bg-white text-ink border-2 border-sand/10 group-hover:bg-olive-dark group-hover:text-white group-hover:border-transparent hover:scale-105 transition-all font-bold text-lg" 
+                onClick={() => handleVendorAction(bestVendor)}
+              >
+                View Details
               </Button>
             </div>
           </CardContent>

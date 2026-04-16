@@ -15,6 +15,7 @@ import { RecipeGenerator } from './pages/RecipeGenerator';
 import { CommunityInsights } from './pages/CommunityInsights';
 import { Settings } from './pages/Settings';
 import { GovernmentSchemes } from './pages/GovernmentSchemes';
+import { EmergencyContacts } from './pages/EmergencyContacts';
 import { getProfile } from './lib/storage';
 import { getSettings, applySettings } from './lib/settings';
 
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="/recipes" element={<Layout><RecipeGenerator /></Layout>} />
         <Route path="/schemes" element={<Layout><GovernmentSchemes /></Layout>} />
         <Route path="/settings" element={<Layout><Settings /></Layout>} />
+        <Route path="/emergency" element={<Layout><EmergencyContacts /></Layout>} />
         
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
